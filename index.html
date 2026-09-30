@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AgriConnect – Smart Farming Assistant</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f1f5ee;--card:#fff;--ink:#17261b;--mute:#5b6b5f;--line:#d5dfd0;--green:#2c6b3c;--green2:#e3efdf;--sun:#e8b431;--warn:#a5481f;--warnbg:#fbeadf;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a14;--card:#1b261e;--ink:#e8f0e6;--mute:#9db0a1;--line:#2d3d31;--green:#6fc084;--green2:#223a28;--warn:#f0a070;--warnbg:#3a261a}}
+:root[data-theme="dark"]{--bg:#121a14;--card:#1b261e;--ink:#e8f0e6;--mute:#9db0a1;--line:#2d3d31;--green:#6fc084;--green2:#223a28;--warn:#f0a070;--warnbg:#3a261a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:'Bricolage Grotesque',system-ui,sans-serif;margin:0;line-height:1.15}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+header{padding:8px 0 20px}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800;letter-spacing:-.02em}
+header p{margin:6px 0 0;color:var(--mute);max-width:52ch}
+.sim{display:inline-block;background:var(--sun);color:#2a2100;font-size:.78rem;font-weight:600;padding:2px 9px;border-radius:99px}
+nav{display:flex;gap:6px;background:var(--green2);padding:5px;border-radius:14px;margin-bottom:20px}
+nav button{flex:1;border:0;background:transparent;color:var(--ink);font:600 .95rem Figtree,sans-serif;padding:10px 6px;border-radius:10px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--green);color:#fff}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel[hidden]{display:none}
+h2{font-size:1.5rem;margin-bottom:4px}
+.sub{color:var(--mute);margin:0 0 16px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.9rem;margin-bottom:4px}
+select,input[type=text],input[type=number]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{border:0;background:var(--green);color:#fff;font:600 1rem Figtree,sans-serif;padding:11px 18px;border-radius:10px;cursor:pointer}
+.btn.alt{background:var(--green2);color:var(--green)}
+.btn.small{padding:6px 12px;font-size:.88rem}
+.crops{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:18px}
+.crop{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.crop h3{font-size:1.15rem}
+.crop .meta{font-size:.88rem;color:var(--mute)}
+.fit{height:6px;border-radius:9px;background:var(--green2);overflow:hidden}
+.fit i{display:block;height:100%;background:var(--green)}
+.crop .btn{margin-top:auto}
+.weather{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;background:var(--green2);border-radius:10px;font-size:.92rem}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;margin-bottom:14px}
+.drop img{max-width:100%;max-height:240px;border-radius:10px;margin-top:10px}
+.result{border-radius:14px;padding:16px;margin-top:14px;border:1px solid var(--line)}
+.result.warn{background:var(--warnbg)}
+.result h3{font-size:1.25rem;margin:4px 0}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:6px 0 10px}
+.bar i{display:block;height:100%;background:var(--green)}
+ul{padding-left:20px;margin:6px 0}
+.rem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rem:last-child{border:0}
+.rem.done .t{text-decoration:line-through;color:var(--mute)}
+.rem .t{flex:1}
+.rem .t small{display:block;color:var(--mute)}
+.rem input{width:22px;height:22px;accent-color:var(--green)}
+.empty{color:var(--mute);padding:14px 0}
+.stat{display:flex;gap:18px;margin:0 0 12px;font-size:.9rem;color:var(--mute)}
+.stat b{color:var(--ink)}
+footer{margin-top:22px;font-size:.85rem;color:var(--mute)}
+@media (prefers-reduced-motion:no-preference){.result{animation:in .3s ease}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>AgriConnect</h1>
+  <p>Crop advice, plant-health checks and farm reminders in one simple app. <span class="sim">Demo – uses sample data</span></p>
+</header>
+
+<nav role="tablist" aria-label="Features">
+  <button role="tab" id="t0" aria-selected="true" aria-controls="p0">Crop guide</button>
+  <button role="tab" id="t1" aria-selected="false" aria-controls="p1">Plant health</button>
+  <button role="tab" id="t2" aria-selected="false" aria-controls="p2">Reminders <span id="cnt"></span></button>
+</nav>
+
+<section class="panel" id="p0" role="tabpanel" aria-labelledby="t0">
+  <h2>What should I plant?</h2>
+  <p class="sub">Tell us about your farm to see crops that suit it.</p>
+  <div class="row">
+    <div><label for="loc">Location</label>
+      <select id="loc">
+        <option>Faridabad, Haryana</option><option>Ludhiana, Punjab</option><option>Pune, Maharashtra</option><option>Nashik, Maharashtra</option><option>Coimbatore, Tamil Nadu</option>
+      </select></div>
+    <div><label for="season">Season</label>
+      <select id="season"><option value="kharif">Kharif (Jun–Oct)</option><option value="rabi" selected>Rabi (Nov–Mar)</option><option value="zaid">Zaid (Mar–Jun)</option></select></div>
+    <div><label for="soil">Soil type</label>
+      <select id="soil"><option value="alluvial">Alluvial</option><option value="black">Black (regur)</option><option value="red">Red</option><option value="sandy">Sandy</option></select></div>
+  </div>
+  <button class="btn" id="go">Show suitable crops</button>
+  <div id="wx" class="weather" hidden></div>
+  <div id="crops" class="crops"></div>
+</section>
+
+<section class="panel" id="p1" role="tabpanel" aria-labelledby="t1" hidden>
+  <h2>Check a leaf</h2>
+  <p class="sub">Upload a clear photo of one leaf. Results here are a <span class="sim">simulated demo</span> – no real model is running.</p>
+  <div class="drop">
+    <label for="leaf" class="btn alt" style="display:inline-block;cursor:pointer">Choose leaf photo</label>
+    <input id="leaf" type="file" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px">
+    <div id="prev"></div>
+  </div>
+  <button class="btn" id="scan" disabled>Check plant health</button>
+  <div id="res"></div>
+</section>
+
+<section class="panel" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <h2>Farm reminders</h2>
+  <p class="sub">Add a crop and get a simple care schedule.</p>
+  <div class="row">
+    <div><label for="rc">Crop</label><select id="rc"></select></div>
+    <div><label for="rd">Sowing date</label><input type="date" id="rd"></div>
+  </div>
+  <button class="btn" id="addr">Add care schedule</button>
+  <div class="stat" style="margin-top:18px"><span>Created: <b id="sc">0</b></span><span>Done: <b id="sd">0</b></span></div>
+  <div id="rems"></div>
+</section>
+
+<footer>Student hackathon prototype. Weather, crop fit and leaf results are sample data. Real use needs verified local data and expert review.</footer>
+</div>
+
+<script>
+const CROPS=[
+ {n:'Wheat',s:['rabi'],soil:['alluvial','black'],days:120,water:7,tip:'Irrigate at crown-root and flowering stages.'},
+ {n:'Mustard',s:['rabi'],soil:['alluvial','sandy'],days:110,water:15,tip:'Needs little water; watch for aphids.'},
+ {n:'Chickpea',s:['rabi'],soil:['black','red','sandy'],days:105,water:14,tip:'Fixes nitrogen; avoid waterlogging.'},
+ {n:'Paddy (rice)',s:['kharif'],soil:['alluvial','black'],days:130,water:3,tip:'Keep 2–5 cm standing water in early growth.'},
+ {n:'Maize',s:['kharif','zaid'],soil:['alluvial','red'],days:95,water:6,tip:'Sensitive to waterlogging at seedling stage.'},
+ {n:'Cotton',s:['kharif'],soil:['black'],days:170,water:10,tip:'Deep black soil holds moisture well.'},
+ {n:'Groundnut',s:['kharif','zaid'],soil:['sandy','red'],days:110,water:8,tip:'Loose sandy soil helps pod formation.'},
+ {n:'Watermelon',s:['zaid'],soil:['sandy','alluvial'],days:85,water:4,tip:'Sandy, warm soil gives sweeter fruit.'},
+ {n:'Sunflower',s:['zaid','rabi'],soil:['black','red','alluvial'],days:100,water:9,tip:'Tolerates heat; needs full sun.'},
+ {n:'Millet (bajra)',s:['kharif','zaid'],soil:['sandy','red'],days:80,water:12,tip:'Very drought tolerant.'}
+];
+const WX={'Faridabad, Haryana':[24,'Clear',10],'Ludhiana, Punjab':[22,'Mostly sunny',15],'Pune, Maharashtra':[28,'Partly cloudy',30],'Nashik, Maharashtra':[27,'Clear',20],'Coimbatore, Tamil Nadu':[30,'Light showers',60]};
+const DIS=[
+ {n:'Early blight (sample)',c:86,cause:'Fungal spots with rings on older leaves.',act:['Remove affected leaves','Avoid overhead watering','Ask an expert about a suitable fungicide']},
+ {n:'Leaf rust (sample)',c:78,cause:'Orange-brown pustules on leaf surface.',act:['Isolate affected plants','Improve air flow between rows','Ask an expert before spraying']},
+ {n:'Nutrient deficiency (sample)',c:54,cause:'Yellowing between veins may point to low nitrogen or iron.',act:['Test the soil','Check watering pattern','Talk to a local advisor']},
+ {n:'Looks healthy (sample)',c:91,cause:'No visible signs of disease in this photo.',act:['Keep your regular schedule','Re-check in a week']}
+];
+const $=id=>document.getElementById(id);
+let rems=[],created=0;
+try{const s=JSON.parse(localStorage.getItem('agri')||'null');if(s){rems=s.rems||[];created=s.created||0}}catch(e){}
+function save(){try{localStorage.setItem('agri',JSON.stringify({rems,created}))}catch(e){}}
+
+// Tabs
+const tabs=[0,1,2].map(i=>$('t'+i));
+tabs.forEach((t,i)=>t.onclick=()=>{tabs.forEach((x,j)=>{x.setAttribute('aria-selected',i===j);$('p'+j).hidden=i!==j})});
+
+// Crop guide
+function fit(c,s,soil){return (c.s.includes(s)?60:0)+(c.soil.includes(soil)?40:0)}
+$('go').onclick=()=>{
+  const loc=$('loc').value,s=$('season').value,soil=$('soil').value,w=WX[loc];
+  $('wx').hidden=false;
+  $('wx').innerHTML=`<b>${loc}</b><span>${w[0]}°C, ${w[1]}</span><span>Rain chance ${w[2]}%</span><span class="sim">Sample weather</span>`;
+  const list=CROPS.map(c=>({c,f:fit(c,s,soil)})).filter(x=>x.f>=60).sort((a,b)=>b.f-a.f);
+  $('crops').innerHTML=list.length?list.map(({c,f})=>`<div class="crop"><h3>${c.n}</h3>
+   <div class="fit" aria-label="Fit ${f}%"><i style="width:${f}%"></i></div>
+   <div class="meta">${f===100?'Great fit':'Good fit'} · ~${c.days} days to harvest · water every ${c.water} days</div>
+   <div>${c.tip}</div><button class="btn small" data-c="${c.n}">Add reminders</button></div>`).join(''):'<p class="empty">No sample crops match. Try another season or soil.</p>';
+};
+$('crops').onclick=e=>{const n=e.target.dataset.c;if(n){addSchedule(n,new Date().toISOString().slice(0,10));tabs[2].click()}};
+
+// Plant health
+let file=null;
+$('leaf').onchange=e=>{
+  file=e.target.files[0];$('res').innerHTML='';
+  if(!file){$('prev').innerHTML='';$('scan').disabled=true;return}
+  const r=new FileReader();r.onload=()=>$('prev').innerHTML=`<img src="${r.result}" alt="Uploaded leaf">`;r.readAsDataURL(file);
+  $('scan').disabled=false;
+};
+$('scan').onclick=()=>{
+  const d=DIS[(file.size+file.name.length)%DIS.length];
+  const low=d.c<70;
+  $('res').innerHTML=`<div class="result ${low?'warn':''}"><span class="sim">Simulated result</span>
+   <h3>${d.n}</h3><p style="margin:0">${d.cause}</p>
+   <div class="bar" aria-label="Confidence ${d.c}%"><i style="width:${d.c}%"></i></div>
+   <small>Confidence: ${d.c}% (sample value)</small>
+   <p style="margin:10px 0 0"><b>Suggested next steps</b></p><ul>${d.act.map(a=>`<li>${a}</li>`).join('')}</ul>
+   ${low?'<p><b>Not certain.</b> Please contact a local agricultural expert before acting.</p>':''}</div>`;
+};
+
+// Reminders
+$('rc').innerHTML=CROPS.map(c=>`<option>${c.n}</option>`).join('');
+$('rd').value=new Date().toISOString().slice(0,10);
+function addSchedule(name,date){
+  const c=CROPS.find(x=>x.n===name),d0=new Date(date+'T00:00');
+  const mk=(off,txt)=>{const d=new Date(d0);d.setDate(d.getDate()+off);return{id:Math.random().toString(36).slice(2),crop:name,text:txt,date:d.toISOString().slice(0,10),done:false}};
+  const add=[mk(0,'Sow seeds and water lightly'),mk(c.water,'Watering'),mk(c.water*2,'Watering'),mk(Math.round(c.days*.4),'Weeding and check for pests'),mk(Math.round(c.days*.6),'Apply fertiliser (as advised locally)'),mk(c.days,'Harvest check')];
+  rems.push(...add);rems.sort((a,b)=>a.date.localeCompare(b.date));created+=add.length;save();render();
+}
+$('addr').onclick=()=>addSchedule($('rc').value,$('rd').value||new Date().toISOString().slice(0,10));
+$('rems').onchange=e=>{const r=rems.find(x=>x.id===e.target.dataset.id);if(r){r.done=e.target.checked;save();render()}};
+function render(){
+  const open=rems.filter(r=>!r.done).length;
+  $('cnt').textContent=open?`(${open})`:'';
+  $('sc').textContent=created;$('sd').textContent=rems.filter(r=>r.done).length;
+  $('rems').innerHTML=rems.length?rems.map(r=>`<label class="rem ${r.done?'done':''}"><input type="checkbox" data-id="${r.id}" ${r.done?'checked':''}>
+   <span class="t">${r.crop}: ${r.text}<small>${new Date(r.date+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}</small></span></label>`).join(''):'<p class="empty">No reminders yet. Pick a crop and add a care schedule.</p>';
+}
+render();$('go').click();
+</script>
+</body>
+</html>
